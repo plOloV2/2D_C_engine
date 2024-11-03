@@ -8,27 +8,16 @@ comp_time() {
     return ${exit_code}
 }
 
-check_dependencies() {
-    for file in "${DEPEN_FILES[@]}"; do
-        if [[ ! -f "$LIB_FILES_LOCATION/$file" ]]; then
-            echo "Error: Dependency $file not found in $LIB_FILES_LOCATION."
-            return 1
-        fi
-    done
-    return 0
-}
 
 # Set file locations
 SOURCE_FILES_LOCATION="src"
 BIN_FILES_LOCATION="bin"
-LIB_FILES_LOCATION="lib"
 
 # Set compiling flags for gcc
-FLAGS=(-fopenmp)
+FLAGS=(-fopenmp -lglfw -lGL -lm)
 
 # Set the source file and output binary names
 SOURCE_FILE="main.c"
-DEPEN_FILES=()
 OUTPUT_BINARY="game"
 
 # Check source file is present
@@ -37,23 +26,17 @@ if [ ! -f "$SOURCE_FILES_LOCATION/$SOURCE_FILE" ]; then
     exit 1
 fi
 
-# Check dependencies
-if check_dependencies; then
-    echo "All dependencies are present. Compiling..."
+echo "Compiling..."
 
-    mkdir -p "$BIN_FILES_LOCATION"
+mkdir -p "$BIN_FILES_LOCATION"
 
-    # Clear the bin directory
-    echo "Clearing the bin directory..."
-    rm -rf "$BIN_FILES_LOCATION"/*
+# Clear the bin directory
+echo "Clearing the bin directory..."
+rm -rf "$BIN_FILES_LOCATION"/*
 
-    # Compile the source file
-    echo "Compiling program with flags: ${FLAGS[@]}"
-    comp_time gcc "$SOURCE_FILES_LOCATION/$SOURCE_FILE" -o "$BIN_FILES_LOCATION/$OUTPUT_BINARY" "$LIB_FILES_LOCATION/"*.h "${FLAGS[@]}"
-else
-    echo "Compilation aborted due to missing dependencies."
-    exit 1
-fi
+# Compile the source file
+echo "Compiling program with flags: ${FLAGS[@]}"
+comp_time gcc "$SOURCE_FILES_LOCATION/$SOURCE_FILE" -o "$BIN_FILES_LOCATION/$OUTPUT_BINARY" "${FLAGS[@]}"
 
 # Check if the compilation was successful
 if [ $? -eq 0 ]; then
